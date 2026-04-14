@@ -109,7 +109,7 @@ def gen_exfiltration(out_dir: str, num_users: int = 5, days: int = 7):
 
         write_csv(os.path.join(out_dir, f"exfil-{user}.csv"), rows)
 
-    print(f"[generate] ✅ Exfiltration scenario: {num_users} users → {out_dir}")
+    print(f"[generate] OK Exfiltration scenario: {num_users} users -> {out_dir}")
 
 
 # ── Scenario 2: Email Leak ──────────────────────────────────────────────────────
@@ -151,7 +151,7 @@ def gen_email_leak(out_dir: str, num_users: int = 5, days: int = 7):
 
         write_csv(os.path.join(out_dir, f"emailleak-{user}.csv"), rows)
 
-    print(f"[generate] ✅ Email leak scenario: {num_users} users → {out_dir}")
+    print(f"[generate] OK Email leak scenario: {num_users} users -> {out_dir}")
 
 
 # ── Scenario 3: Normal Behavior ────────────────────────────────────────────────
@@ -210,7 +210,7 @@ def gen_normal(out_dir: str, num_users: int = 10, days: int = 10):
 
         write_csv(os.path.join(out_dir, f"normal-{user}.csv"), rows)
 
-    print(f"[generate] ✅ Normal behavior scenario: {num_users} users → {out_dir}")
+    print(f"[generate] OK Normal behavior scenario: {num_users} users -> {out_dir}")
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────

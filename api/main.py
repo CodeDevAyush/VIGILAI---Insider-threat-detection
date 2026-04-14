@@ -34,8 +34,8 @@ app.add_middleware(
 # ── Dataset registry ──────────────────────────────────────────────────────────
 DATASETS: dict = {
     "cert_r42_1": {
-        "name": "CERT r4.2-1 — Known Insider Cases",
-        "data_dir": "data/r4.2-1",
+        "name": "CERT r4.2 — Known Insider Cases",
+        "data_dir": "data/cert_r4.2",
         "score_percentile": 20.0,
         "description": "30 real insider threat cases from the CERT r4.2 benchmark dataset.",
         "type": "real",

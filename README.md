@@ -51,49 +51,70 @@ The pipeline also ships with **3 synthetic test scenarios** (no dataset download
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Local Setup)
 
-### 1. Install Python dependencies
+### 1. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Generate synthetic test data
+### 2. Generate Synthetic Test Data
 ```bash
 python generate_test_data.py
 ```
 Creates the 3 scenario directories under `data/test_scenarios/`.
 
-### 3. Train the model
+### 3. Train the Model
 ```bash
 python models/train_model.py
 ```
 Reads all 5 CERT CSVs, engineers features, and saves `models/isolation_forest.pkl`.  
 *(Takes ~15–20 min depending on hardware due to the 28M-row http.csv)*
 
-### 4. Run the full pipeline (CLI)
+### 4. Run the Full Pipeline (CLI)
 ```bash
 python pipeline.py
 ```
 
-### 5. Start the FastAPI backend
+### 5. Start the FastAPI Backend
 ```bash
-python -m uvicorn api.main:app --reload --port 8000
+# MacOS/Linux
+./scripts/run_backend.sh
+
+# Windows (Powershell)
+.\scripts\run_backend.ps1
 ```
 API docs available at **http://localhost:8000/docs**
 
-### 6. Launch the React dashboard
+### 6. Launch the React Dashboard
 ```bash
-cd frontend
-npm install
-npm run dev
+# MacOS/Linux
+./scripts/run_frontend.sh
+
+# Windows (Powershell)
+.\scripts\run_frontend.ps1
 ```
 Open **http://localhost:5173** in your browser.
 
-### 7. (Optional) Launch the legacy Streamlit dashboard
-```bash
-python -m streamlit run dashboard/app.py --browser.gatherUsageStats false
-```
+---
+
+## 🐳 Docker Deployment
+
+You can run the entire application stack using Docker Compose:
+
+1. Copy the `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Generate the test data and train the model locally as seen in Quick Start.
+
+3. Start the services:
+   ```bash
+   docker-compose up --build
+   ```
+- Frontend available at **http://localhost:5173**
+- Backend API at **http://localhost:8000**
 
 ---
 
@@ -113,57 +134,15 @@ The FastAPI backend (`api/main.py`) exposes a full REST API for the React fronte
 | `GET` | `/api/results/timeline` | Hourly threat timeline (for charting) |
 | `GET` | `/api/results/scores` | Anomaly score distribution (for histogram) |
 
-**Dataset IDs** accepted by `POST /api/pipeline/run`:
-
-| `dataset_id` | Dataset |
-|---|---|
-| `cert_r42_1` | CERT r4.2-1 — Known Insider Cases (real data) |
-| `exfiltration` | Synthetic — Data Exfiltration Scenario |
-| `email_leak` | Synthetic — Email Leak Scenario |
-| `normal` | Synthetic — Normal Behavior Baseline |
-
----
-
-## 📊 Features Engineered
-
-From the 5 raw CERT log files, the `AnalysisAgent` builds a **per-user × per-hour** feature table:
-
-| Feature | Source |
-|---------|--------|
-| `hour` | All logs |
-| `day_of_week` | All logs |
-| `is_after_hours` | Derived (hour < 7 or > 20) |
-| `logon_count` | `logon.csv` |
-| `logoff_count` | `logon.csv` |
-| `usb_connect` | `device.csv` |
-| `usb_disconnect` | `device.csv` |
-| `file_count` | `file.csv` |
-| `http_count` | `http.csv` |
-| `email_count` | `email.csv` |
-| `email_size_total` | `email.csv` |
-| `email_attachments_total` | `email.csv` |
-
----
-
-## 🔍 Verification Rules
-
-Anomalies are confirmed threats if **any** rule fires:
-
-| Rule | Condition |
-|------|-----------|
-| After-hours activity | Hour < 7 or > 20 |
-| USB device connected | `usb_connect > 0` |
-| High file volume | `file_count > 50` |
-| Mass email | `email_count > 20` |
-| Large email size | `email_size_total > 5 MB` |
-| Excessive browsing | `http_count > 100` |
-
 ---
 
 ## 📂 Project Structure
 
 ```
 insider/
+├── Dockerfile                  # Backend API Dockerfile
+├── docker-compose.yml          # Container configuration for backend + frontend
+├── .env.example                # Environment variables reference
 ├── agents/
 │   ├── monitoring_agent.py     # Load 5 CERT CSVs or synthetic scenario CSVs
 │   ├── analysis_agent.py       # Feature engineering (12 features, per-user-hour)
@@ -173,54 +152,26 @@ insider/
 │   └── learning_agent.py       # On-demand model retraining
 ├── api/
 │   └── main.py                 # FastAPI REST API (React-ready, CORS enabled)
-├── dashboard/
-│   └── app.py                  # Legacy Streamlit dashboard
 ├── frontend/                   # React + Vite dashboard
 │   ├── src/
 │   │   ├── App.jsx             # Main app with all views and charts
 │   │   ├── index.css           # Global styles
 │   │   └── main.jsx            # React entry point
-│   ├── package.json
-│   └── vite.config.js
+│   ├── Dockerfile              # Frontend container file
+│   └── package.json
 ├── models/
 │   ├── train_model.py          # Training script (saves isolation_forest.pkl)
 │   └── isolation_forest.pkl    # Trained model (not in repo)
+├── scripts/                    # Helper scripts for startup
 ├── data/
 │   ├── cert_r4.2/              # ← Place real CERT dataset here (not in repo)
-│   ├── r4.2-1/                 # Curated subset: 30 known insider cases
-│   ├── test_scenarios/
-│   │   ├── exfiltration/       # Synthetic: 5 exfiltration users
-│   │   ├── email_leak/         # Synthetic: 5 email leak users
-│   │   └── normal/             # Synthetic: 10 normal users
+│   ├── test_scenarios/         # Generated synthetic datasets
 │   └── alerts.jsonl            # Persistent alert log
 ├── generate_test_data.py       # Generates all 3 synthetic test scenarios
 ├── pipeline.py                 # End-to-end pipeline orchestrator
 ├── recheck_pipeline.py         # Re-runs pipeline for debugging / validation
-├── test_model.py               # Standalone model evaluation with per-user report
-└── requirements.txt
+└── requirements.txt            # Streamlined Python dependencies
 ```
-
----
-
-## 🛠️ Tech Stack
-
-### Backend
-- **Python 3.10+**
-- **scikit-learn** — Isolation Forest anomaly detection
-- **pandas** — data processing (chunked reading for large files)
-- **FastAPI** + **Uvicorn** — REST API server
-- **joblib** — model persistence
-
-### Frontend
-- **React 19** + **Vite 8** — component-based UI
-- **Recharts** — interactive charts (line, bar, scatter)
-- **Lucide React** — icon library
-- **Axios** — HTTP client for API calls
-- **React Router v7** — client-side routing
-
-### Legacy Dashboard
-- **Streamlit** — Streamlit dashboard (superseded by React frontend)
-- **Plotly** — interactive charts (used in Streamlit)
 
 ---
 

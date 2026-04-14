@@ -10,7 +10,7 @@ from agents.learning_agent import LearningAgent
 
 
 def run_pipeline(
-    data_dir: str = "data/r4.2-1",
+    data_dir: str = "data/cert_r4.2",
     model_path: str = "models/isolation_forest.pkl",
     score_percentile: float | None = 20.0,
     retrain: bool = False,
