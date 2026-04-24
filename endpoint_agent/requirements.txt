@@ -1,0 +1,16 @@
+# FastAPI & Server
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+pydantic==2.11.7
+
+# MongoDB
+pymongo==4.9.2
+motor==3.6.0
+
+# Agent — File Monitoring & System Info
+watchdog==6.0.0
+psutil==6.1.1
+requests==2.32.3
+
+# Utilities
+python-dotenv==1.2.2

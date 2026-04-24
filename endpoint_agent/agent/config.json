@@ -1,0 +1,12 @@
+{
+  "device_id": "PC_001",
+  "server_url": "http://localhost:8001",
+  "log_interval": 5,
+  "watch_paths": [
+    "ALL_DRIVES"
+  ],
+  "retry_attempts": 3,
+  "retry_backoff_seconds": 2,
+  "batch_size": 50,
+  "simulation_events": 30
+}

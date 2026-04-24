@@ -18,6 +18,7 @@ insider/
 ├── api/                  # FastAPI backend
 │   ├── agents/           # ML Pipeline (Trigger, Detection, Verification, Response)
 │   └── main.py           # Core API & routing
+├── endpoint_agent/       # Standalone Windows Monitoring Agent (Watchdog)
 ├── frontend/             # React + Vite Sentinel Dashboard
 ├── models/               # Saved ML models (Isolation Forest)
 ├── start_pipeline.bat    # Windows Orchestrator Script
@@ -25,7 +26,7 @@ insider/
 
 | Agent Layer | Responsibility |
 |-------------|----------------|
-| **Endpoint Agent** | Runs natively via a Watchdog on Windows, streaming live internal telemetry (`E:\Monitoring Agent`) directly into the pipeline. |
+| **Endpoint Agent** | Runs natively via a Watchdog on Windows, streaming live internal telemetry (`insider/endpoint_agent`) directly into the pipeline. |
 | **Trigger Agent** | Instantly catches incoming traffic and filters non-threat vectors before escalating. |
 | **Detection Agent** | Connects dynamically to an `Isolation Forest` Machine Learning model. It retrieves the user's active context matrix (hourly file counts, logins) from MongoDB to natively execute Anomaly Predictions. |
 | **Verification Agent** | Organic ruleset engine that analyzes threat markers against explicit Whitelists (e.g., `temp`, `whatsapp`, `appdata`) to eliminate False Positives system noise. |
@@ -35,22 +36,55 @@ insider/
 
 ## 🚀 Quick Start (Local Setup)
 
-The architecture has been unified for an ultra-fast startup via the local orchestration script.
+To run the pipeline natively, follow these comprehensive startup instructions.
 
-### 1. Launch the Pipeline Orchestrator
-Instead of opening multiple terminals, navigate to the `insider` root directory and simply execute:
+### 0. Prerequisites
+Before running the pipeline, ensure your system has the following installed:
+1. **Python 3.10+** (For the FastAPI Backend & Endpoint Agent)
+2. **Node.js v18+** (For the React Frontend Dashboard)
+3. **MongoDB Community Server** (Used for persistence and context memory)
+   - Download and install [MongoDB Community Server](https://www.mongodb.com/try/download/community).
+   - Ensure the MongoDB service is actively running on the default port `localhost:27017`.
+
+### 1. Install Dependencies
+You must install the required dependencies for both the backend and frontend.
+
+**Backend & Agent (Python):**
+Open a terminal in the root `insider` directory and run:
+```bash
+pip install -r requirements.txt
+pip install -r endpoint_agent/requirements.txt
+```
+
+**Frontend (Node.js):**
+Navigate into the `frontend` folder and install the NPM packages:
+```bash
+cd frontend
+npm install
+cd ..
+```
+
+### 2. Configure Environment Variables
+By default, the application expects MongoDB to be running locally. If you need to change this, create or modify the `.env` file in the root `insider` directory:
+```env
+MONGO_URI=mongodb://localhost:27017
+MONGO_DB=Vigil-Ai
+```
+
+### 3. Launch the Pipeline Orchestrator
+Instead of manually opening multiple terminals, navigate to the `insider` root directory and simply execute the orchestrator script:
 ```bash
 start_pipeline.bat
 ```
-*(You can also double-click the script natively from your Windows Desktop!)*
+*(You can also double-click the `start_pipeline.bat` file natively from your Windows Desktop!)*
 
 This cleanly initiates the 3 Core Modules concurrently:
 - `[PORT 8001]` **Sentinel ML Backend** (receives and processes logs natively)
 - `[PORT 5173]` **React Live Dashboard** (admin interface)
 - **Monitoring Agent** (The active filesystem watcher tracking directory events organically in the background)
 
-### 2. View the Live Dashboard
-Navigate to **[http://localhost:5173](http://localhost:5173)**. You will see an Autonomous Feed tracking system logs actively, supported by KPI graphics displaying current anomalies.
+### 4. View the Live Dashboard
+Navigate to **[http://localhost:5173](http://localhost:5173)** in your web browser. You will see an Autonomous Feed tracking system logs actively, supported by KPI graphics displaying current anomalies.
 
 ---
 
@@ -86,7 +120,7 @@ Inside the `Sentinel Dashboard` feed, confirmed threats are not completely stati
 
 ## ⚙️ Configuration Overrides
 
-Your Endpoint Agent relies on its respective `config.json` inside the `Monitoring Agent` directory to dictate where traffic is streamed:
+Your Endpoint Agent relies on its respective `config.json` inside the `endpoint_agent/agent` directory to dictate where traffic is streamed:
 
 ```json
 {

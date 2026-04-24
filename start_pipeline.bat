@@ -14,7 +14,7 @@ echo [2/3] Starting React Live Dashboard (Port 5173)...
 start "Sentinel Dashboard" cmd /k "cd /d c:\Users\ASUS\OneDrive\Desktop\insider\frontend && title Sentinel Dashboard && npm run dev"
 
 echo [3/3] Starting Autonomous Monitoring Agent (System Watchdog)...
-start "Monitoring Agent" cmd /k "cd /d e:\Monitoring Agent && title Endpoint File Monitor && python -m agent.agent"
+start "Monitoring Agent" cmd /k "cd /d c:\Users\ASUS\OneDrive\Desktop\insider\endpoint_agent && title Endpoint File Monitor && python -m agent.agent"
 
 echo.
 echo SUCCESS: All 3 modules have been deployed natively.
