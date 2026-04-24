@@ -41,7 +41,10 @@ const NAV = [
   )},
 ]
 
+import Login from './pages/Login'
+
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('sentinel_token'))
   const [page, setPage] = useState('dashboard')
   const [clock, setClock] = useState(new Date().toTimeString().slice(0,8))
   const [toast, setToast] = useState(null)
@@ -64,6 +67,7 @@ export default function App() {
   }
 
   const fetchAll = useCallback(async () => {
+    if (!isAuthenticated) return
     try {
       const [l, a, s, d, u] = await Promise.allSettled([getLogs(), getAlerts(), getStats(), getDevices(), getUserRisk()])
       if (l.status === 'fulfilled') setLogs(l.value)
@@ -72,15 +76,16 @@ export default function App() {
       if (d.status === 'fulfilled') setDevices(d.value)
       if (u.status === 'fulfilled') setUserRisk(u.value)
     } catch {}
-  }, [])
+  }, [isAuthenticated])
 
   const fetchConfig = useCallback(async () => {
+    if (!isAuthenticated) return
     try {
       const [s, w] = await Promise.allSettled([getSettings(), getWatchPaths()])
       if (s.status === 'fulfilled') setSettings(s.value)
       if (w.status === 'fulfilled') setWatchPaths(w.value.paths || [])
     } catch {}
-  }, [])
+  }, [isAuthenticated])
 
   usePolling(fetchAll, 3000)
   usePolling(fetchConfig, 10000)
@@ -89,7 +94,21 @@ export default function App() {
 
   const showPage = (id) => setPage(id)
 
+  const handleLogout = () => {
+    localStorage.removeItem('sentinel_token')
+    setIsAuthenticated(false)
+  }
+
   const pageProps = { logs, alerts, stats, devices, userRisk, settings, setSettings, watchPaths, setWatchPaths, showToast }
+
+  if (!isAuthenticated) {
+    return (
+      <>
+        <Toast toast={toast} />
+        <Login onLogin={setIsAuthenticated} showToast={showToast} />
+      </>
+    )
+  }
 
   return (
     <>
@@ -128,6 +147,9 @@ export default function App() {
               <button className="notif-btn" onClick={() => showPage('threats')}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
                 {activeAlerts > 0 && <div className="notif-dot" />}
+              </button>
+              <button className="notif-btn" style={{ marginLeft: 8 }} onClick={handleLogout} title="Logout">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
               </button>
               <div className="status-pill"><div className="pulse-dot" />LIVE</div>
             </div>

@@ -3,7 +3,8 @@ from threading import Thread
 from typing import Optional, Dict, Any, List
 from datetime import datetime, timezone
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pymongo import MongoClient
@@ -104,6 +105,28 @@ def _today_start() -> str:
     return now.replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
 
 
+
+# ─── Auth ─────────────────────────────────────────────────────────────────────
+security = HTTPBearer()
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    if token != "sentinel-admin-token":
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    return token
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+@app.post("/login")
+def login(creds: LoginRequest):
+    admin_user = os.getenv("ADMIN_USER", "admin")
+    admin_pass = os.getenv("ADMIN_PASS", "admin")
+    if creds.username == admin_user and creds.password == admin_pass:
+        return {"token": "sentinel-admin-token"}
+    raise HTTPException(status_code=401, detail="Invalid credentials")
+
 # ─── Ingest ───────────────────────────────────────────────────────────────────
 @app.post("/logs")
 async def receive_log(batch: LogBatch):
@@ -119,20 +142,20 @@ async def receive_log(batch: LogBatch):
 
 
 # ─── Logs ─────────────────────────────────────────────────────────────────────
-@app.get("/logs/recent")
+@app.get("/logs/recent", dependencies=[Depends(verify_token)])
 def get_recent_logs():
     docs = list(db.logs.find().sort("timestamp", -1).limit(30))
     return [_serialize(d) for d in docs]
 
 
 # ─── Alerts ───────────────────────────────────────────────────────────────────
-@app.get("/alerts")
+@app.get("/alerts", dependencies=[Depends(verify_token)])
 def get_alerts():
     docs = list(db.alerts.find().sort("timestamp", -1).limit(50))
     return [_serialize(d) for d in docs]
 
 
-@app.post("/alerts/{alert_id}/action")
+@app.post("/alerts/{alert_id}/action", dependencies=[Depends(verify_token)])
 def alert_action(alert_id: str, payload: ActionRequest):
     action = payload.action
     try:
@@ -170,7 +193,7 @@ def get_summary():
     }
 
 
-@app.get("/dashboard/stats")
+@app.get("/dashboard/stats", dependencies=[Depends(verify_token)])
 def get_dashboard_stats():
     today = _today_start()
 
@@ -232,7 +255,7 @@ def get_dashboard_stats():
 # Static device registry (extend later from DB if needed)
 DEVICES_REGISTRY = {}
 
-@app.get("/devices")
+@app.get("/devices", dependencies=[Depends(verify_token)])
 def get_devices():
     # Get live devices from db
     live_devices = set(db.logs.distinct("device_id") + db.alerts.distinct("device_id"))
@@ -265,7 +288,7 @@ def get_devices():
 # ─── Users / Risk Scores ─────────────────────────────────────────────────────
 KNOWN_USERS = []
 
-@app.get("/users/risk")
+@app.get("/users/risk", dependencies=[Depends(verify_token)])
 def get_user_risk():
     live_users = set(db.logs.distinct("user") + db.alerts.distinct("user"))
     all_users = live_users.union(KNOWN_USERS)
@@ -308,12 +331,12 @@ def get_user_risk():
 
 
 # ─── Settings ────────────────────────────────────────────────────────────────
-@app.get("/settings")
+@app.get("/settings", dependencies=[Depends(verify_token)])
 def get_settings():
     return _load_settings()
 
 
-@app.post("/settings")
+@app.post("/settings", dependencies=[Depends(verify_token)])
 def save_settings(payload: SettingsPayload):
     current = _load_settings()
     updates = payload.model_dump(exclude_none=True)
@@ -323,13 +346,13 @@ def save_settings(payload: SettingsPayload):
 
 
 # ─── Watch Paths ─────────────────────────────────────────────────────────────
-@app.get("/watch-paths")
+@app.get("/watch-paths", dependencies=[Depends(verify_token)])
 def get_watch_paths():
     s = _load_settings()
     return {"paths": s.get("watch_paths", [])}
 
 
-@app.post("/watch-paths")
+@app.post("/watch-paths", dependencies=[Depends(verify_token)])
 def add_watch_path(body: dict):
     path = body.get("path", "").strip()
     if not path:
@@ -343,7 +366,7 @@ def add_watch_path(body: dict):
     return {"paths": paths}
 
 
-@app.delete("/watch-paths")
+@app.delete("/watch-paths", dependencies=[Depends(verify_token)])
 def delete_watch_path(body: dict):
     path = body.get("path", "").strip()
     s = _load_settings()

@@ -84,7 +84,24 @@ This cleanly initiates the 3 Core Modules concurrently:
 - **Monitoring Agent** (The active filesystem watcher tracking directory events organically in the background)
 
 ### 4. View the Live Dashboard
-Navigate to **[http://localhost:5173](http://localhost:5173)** in your web browser. You will see an Autonomous Feed tracking system logs actively, supported by KPI graphics displaying current anomalies.
+Navigate to **[http://localhost:5173](http://localhost:5173)** in your web browser. You will see the Restricted Access login screen.
+
+---
+
+## 🔒 Dashboard Authentication
+
+The Sentinel UI is restricted by a JWT authentication layer to prevent unauthorized access to your system's telemetry.
+
+By default, the credentials are:
+- **Username:** `admin`
+- **Password:** `admin`
+
+You can change these credentials at any time by updating your `.env` file in the root `insider` directory:
+```env
+ADMIN_USER=your_new_username
+ADMIN_PASS=your_new_secure_password
+```
+*Note: Modifying the `.env` file requires you to restart the pipeline (close the terminal and run `start_pipeline.bat` again) for the changes to take effect.*
 
 ---
 
