@@ -12,3 +12,4 @@ joblib==1.5.3
 
 # Utilities
 python-dotenv==1.2.2
+pymongo>=4.0.0

@@ -15,10 +15,15 @@ from agents.analysis_agent import AnalysisAgent, FEATURE_COLS
 
 MODEL_PATH  = "models/isolation_forest.pkl"
 DATA_DIR    = "data/cert_r4.2"
+FALLBACK_DIR = "data/test_scenarios/normal"
 
 
 def build_features(data_dir: str = DATA_DIR) -> pd.DataFrame:
     """Load CERT CSVs and produce the feature table."""
+    if not os.path.exists(data_dir):
+        print(f"[train_model] WARNING: {data_dir} not found. Falling back to {FALLBACK_DIR}")
+        data_dir = FALLBACK_DIR
+
     raw     = MonitoringAgent(data_dir=data_dir).run()
     features = AnalysisAgent().run(raw)
     return features
