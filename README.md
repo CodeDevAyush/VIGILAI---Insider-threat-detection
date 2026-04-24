@@ -40,7 +40,7 @@ The architecture has been unified for an ultra-fast startup via the local orches
 ### 1. Launch the Pipeline Orchestrator
 Instead of opening multiple terminals, navigate to the `insider` root directory and simply execute:
 ```bash
-start_pipeline.bat
+.\start_pipeline.bat
 ```
 *(You can also double-click the script natively from your Windows Desktop!)*
 
