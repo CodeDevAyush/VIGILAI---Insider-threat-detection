@@ -74,7 +74,7 @@ MONGO_DB=Vigil-Ai
 ### 3. Launch the Pipeline Orchestrator
 Instead of manually opening multiple terminals, navigate to the `insider` root directory and simply execute the orchestrator script:
 ```bash
-start_pipeline.bat
+.\start_pipeline.bat
 ```
 *(You can also double-click the `start_pipeline.bat` file natively from your Windows Desktop!)*
 
