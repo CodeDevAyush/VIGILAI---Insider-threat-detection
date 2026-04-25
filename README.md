@@ -1,4 +1,4 @@
-# 🛡️ Sentinel: Event-Driven Agentic AI Pipeline
+# VigilAI: Event-Driven Agentic AI Pipeline
 
 Sentinel is an advanced, autonomous multi-agent pipeline designed to natively detect Insider Threats and data exfiltration. Transitioning away from legacy CSV dataset batching, Sentinel now features a fully **Event-Driven Architecture** that monitors Native Windows Filesystems in real-time. 
 
@@ -6,7 +6,7 @@ Logs are dynamically streamed to a **FastAPI** backend where autonomous Machine 
 
 ---
 
-## 🏗️ Multi-Agent Architecture
+##  Multi-Agent Architecture
 
 ```text
 Endpoint Monitor (Port 8000/Local) → FastAPI (Port 8001) → Trigger → Detection (ML) → Verification → Response
@@ -34,7 +34,7 @@ insider/
 
 ---
 
-## 🚀 Quick Start (Local Setup)
+## Quick Start (Local Setup)
 
 To run the pipeline natively, follow these comprehensive startup instructions.
 
@@ -88,7 +88,7 @@ Navigate to **[http://localhost:5173](http://localhost:5173)** in your web brows
 
 ---
 
-## 🔒 Dashboard Authentication
+## Dashboard Authentication
 
 The Sentinel UI is restricted by a JWT authentication layer to prevent unauthorized access to your system's telemetry.
 
@@ -105,7 +105,7 @@ ADMIN_PASS=your_new_secure_password
 
 ---
 
-## 🚨 Threat Generation & Testing
+## Threat Generation & Testing
 
 There are two primary methods to trigger the Machine Learning detection engines to confirm your pipeline is operating securely:
 
@@ -127,7 +127,7 @@ Since the pipeline is event-driven, you can rapidly trigger alerts by generating
 
 ---
 
-## 🛠️ Admin Action Control
+##  Admin Action Control
 
 Inside the `Sentinel Dashboard` feed, confirmed threats are not completely static. We have deployed Action Modules natively on the frontend:
 - **[Dismiss]**: Destroys the false-positive alert natively off the API.
@@ -135,7 +135,7 @@ Inside the `Sentinel Dashboard` feed, confirmed threats are not completely stati
 
 ---
 
-## ⚙️ Configuration Overrides
+##  Configuration Overrides
 
 Your Endpoint Agent relies on its respective `config.json` inside the `endpoint_agent/agent` directory to dictate where traffic is streamed:
 
