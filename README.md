@@ -150,3 +150,11 @@ Your Endpoint Agent relies on its respective `config.json` inside the `endpoint_
 }
 ```
 *Note: Ensure `server_url` points directly to the Sentinel port `8001` or your Live Stream will skip the Trigger Agents!*
+
+## License
+
+This project is released under the CC BY-NC 4.0 license.
+
+You are free to use, modify, and learn from this code for non-commercial purposes only.
+
+Commercial use, startup usage, or production deployment without permission is strictly prohibited.
